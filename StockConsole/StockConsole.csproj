@@ -9,4 +9,8 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\StockLibrary\StockLibrary.csproj" />
+  </ItemGroup>
+
 </Project>
