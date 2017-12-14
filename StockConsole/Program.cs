@@ -12,18 +12,21 @@ namespace StockConsole
             string apiKey = ConfigurationManager.AppSettings["apiKey"].ToString();
             Console.WriteLine("Using API key " + apiKey);
 
+            string nasdaqListSource = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download";
+            string nyseListSource = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NYSE&render=download";
 
 
-            string html = GetTimeSeriesIntraday("F");
+
+            string html = GetTimeSeriesDaily("YOGA");
 
             Console.WriteLine(html);
 
             Console.ReadKey();
         }
 
-        private static string GetTimeSeriesIntraday(string symbol)
+        private static string GetTimeSeriesDaily(string symbol)
         {
-            string testURL = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=" + symbol + "&interval=1min&apikey=" + ConfigurationManager.AppSettings["apiKey"].ToString();
+            string testURL = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=" + ConfigurationManager.AppSettings["apiKey"].ToString();
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(testURL);
             string html = "";
