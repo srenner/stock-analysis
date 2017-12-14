@@ -6,7 +6,7 @@ using System.Text;
 
 namespace StockLibrary
 {
-    public class AlphaVantage : IFetch
+    public class AlphaVantage : IFundFetch
     {
         public string ApiKey { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StockLibrary;
+using System;
 using System.Configuration;
 using System.IO;
 using System.Net;
@@ -17,6 +18,10 @@ namespace StockConsole
 
             string nasdaqListSource = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download";
             string nyseListSource = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NYSE&render=download";
+
+            var nyseSymbols = new NYSE().GetSymbols(nyseListSource);
+            nyseSymbols.ForEach(x => Console.WriteLine(x));
+            //Console.WriteLine(nyseSymbols);
 
             var alphaVantage = new StockLibrary.AlphaVantage(apiKey);
             string html = alphaVantage.GetTimeSeriesDaily("TGT");
