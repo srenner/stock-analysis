@@ -17,7 +17,7 @@ namespace StockConsole
 
 
 
-            string html = GetTimeSeriesDaily("YOGA");
+            string html = GetTimeSeriesDaily("TGT");
 
             Console.WriteLine(html);
 
