@@ -9,5 +9,6 @@ namespace StockLibrary
         public string Symbol { get; set; }
         public string Name { get; set; }
         public string Exchange { get; set; }
+        public bool IsActive { get; set; }
     }
 }
