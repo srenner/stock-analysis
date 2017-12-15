@@ -31,7 +31,21 @@ namespace StockLibrary
             {
                 await UpdateEntity(fund);
             }
+        }
 
+        public static async Task AddFundDays(List<FundDay> days)
+        {
+            using (var context = new SqliteContext())
+            {
+                foreach(var day in days)
+                {
+                    var dayInDb = context.FundDay.Where(w => w.Symbol == day.Symbol && w.FundDayDate == day.FundDayDate).FirstOrDefault();
+                    if(dayInDb == null)
+                    {
+                        await AddEntity(day);
+                    }
+                }
+            }
         }
 
         public static async Task<T> AddEntity<T>(T entity) where T : class

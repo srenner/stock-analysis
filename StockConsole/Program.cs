@@ -1,8 +1,12 @@
 ﻿using StockLibrary;
 using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace StockConsole
 {
@@ -23,21 +27,35 @@ namespace StockConsole
             //InitializeNYSE();
 
             var funds = DataAccess.GetActiveFunds().Result;
+            var alphaVantage = new StockLibrary.AlphaVantage(apiKey);
 
-            if(funds.Count > 0)
-            {
-                var alphaVantage = new StockLibrary.AlphaVantage(apiKey);
-                string html = alphaVantage.GetTimeSeriesDaily(funds[0].Symbol);
-
-                var days = alphaVantage.ParseJson(html, funds[0].Symbol);
-
-                Console.WriteLine(html);
-            }
-
-
-
-
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             
+            //foreach(var fund in funds)
+            //{
+            //    string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
+            //    var days = alphaVantage.ParseJson(html, fund.Symbol);
+            //    Console.WriteLine("Got " + fund.Symbol);
+            //    Thread.Sleep(100);
+            //}
+
+            Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async fund =>
+            {
+                string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
+                var days = alphaVantage.ParseJson(html, fund.Symbol);
+                await DataAccess.AddFundDays(days);
+                Console.WriteLine("Got " + fund.Symbol);
+                Thread.Sleep(2000);
+            });
+            stopwatch.Stop();
+            Console.WriteLine(funds.Count() + " funds in " + stopwatch.ElapsedMilliseconds);
+
+
+
+
+
+
             Console.ReadKey();
         }
 
