@@ -19,13 +19,13 @@ namespace StockConsole
             string nasdaqListSource = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download";
             string nyseListSource = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NYSE&render=download";
 
-            var nyseSymbols = new NYSE().GetSymbols(nyseListSource);
-            nyseSymbols.ForEach(x => Console.WriteLine(x));
+            var nyseFunds = new NYSE().GetFunds(nyseListSource);
 
-            var nyseFunds = new NYSE().BuildFunds(nyseSymbols);
-
-
-            nyseFunds.ForEach(x => DataAccess.UpsertFund(x));
+            foreach(var fund in nyseFunds)
+            {
+                DataAccess.UpsertFund(fund);
+                Console.WriteLine("Saved " + fund.Symbol);
+            }
 
             //Console.WriteLine(nyseSymbols);
 

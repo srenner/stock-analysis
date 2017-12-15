@@ -7,6 +7,6 @@ namespace StockLibrary
     interface ISymbolFetch
     {
         string ExchangeName { get; set; }
-        List<string> GetSymbols(string url);
+        List<Models.Fund> GetFunds(string url);
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StockLibrary
 {
-    public interface IFundFetch
+    public interface IPriceFetch
     {
         string ApiKey { get; set; }
 

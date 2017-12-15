@@ -16,9 +16,9 @@ namespace StockLibrary
             this.ExchangeName = "NYSE";
         }
 
-        public List<string> GetSymbols(string url)
+        public List<Fund> GetFunds(string url)
         {
-            var symbols = new List<string>();
+            var funds = new List<Fund>();
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
@@ -27,20 +27,25 @@ namespace StockLibrary
                     using (StreamReader reader = new StreamReader(stream))
                     {
                         CsvHelper.CsvReader csvReader = new CsvHelper.CsvReader(reader);
-                        while(csvReader.Read())
+                        csvReader.Configuration.HasHeaderRecord = true;
+
+                        csvReader.Read();
+                        csvReader.ReadHeader();
+
+                        while (csvReader.Read())
                         {
-                            symbols.Add(csvReader.GetField<string>(0));
+                            funds.Add(new Fund
+                            {
+                                Exchange = this.ExchangeName,
+                                IsActive = true,
+                                Symbol = csvReader.GetField<string>(0),
+                                Name = csvReader.GetField<string>(1)
+                            });
                         }
                     }
+
                 }
             }
-            return symbols;
-        }
-
-        public List<Fund> BuildFunds(List<string> strFunds)
-        {
-            var funds = new List<Fund>();
-            strFunds.ForEach(x => funds.Add(new Fund { Symbol = x, Exchange = this.ExchangeName, Name = x, IsActive = true }));
             return funds;
         }
     }
