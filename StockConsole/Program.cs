@@ -21,6 +21,12 @@ namespace StockConsole
 
             var nyseSymbols = new NYSE().GetSymbols(nyseListSource);
             nyseSymbols.ForEach(x => Console.WriteLine(x));
+
+            var nyseFunds = new NYSE().BuildFunds(nyseSymbols);
+
+
+            nyseFunds.ForEach(x => DataAccess.UpsertFund(x));
+
             //Console.WriteLine(nyseSymbols);
 
             var alphaVantage = new StockLibrary.AlphaVantage(apiKey);

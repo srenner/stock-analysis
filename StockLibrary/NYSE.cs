@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StockLibrary.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -8,6 +9,12 @@ namespace StockLibrary
 {
     public class NYSE : ISymbolFetch
     {
+        public string ExchangeName { get; set; }
+
+        public NYSE()
+        {
+            this.ExchangeName = "NYSE";
+        }
 
         public List<string> GetSymbols(string url)
         {
@@ -28,6 +35,13 @@ namespace StockLibrary
                 }
             }
             return symbols;
+        }
+
+        public List<Fund> BuildFunds(List<string> strFunds)
+        {
+            var funds = new List<Fund>();
+            strFunds.ForEach(x => funds.Add(new Fund { Symbol = x, Exchange = this.ExchangeName, Name = x, IsActive = true }));
+            return funds;
         }
     }
 }
