@@ -4,67 +4,76 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StockLibrary
 {
     public class DataAccess
     {
 
-        public static void UpsertFund(Fund fund)
+        public static async Task<List<Fund>> GetActiveFunds()
+        {
+            using (var context = new SqliteContext())
+            {
+                return await context.Fund.Where(w => w.IsActive == true).ToListAsync();
+            }
+        }
+
+        public static async Task UpsertFund(Fund fund)
         {
             var fundInDb = GetEntityByID<Fund>(fund.Symbol);
 
             if(fundInDb == null)
             {
-                AddEntity(fund);
+                await AddEntity(fund);
             }
             else
             {
-                UpdateEntity(fund);
+                await UpdateEntity(fund);
             }
 
         }
 
-        public static T AddEntity<T>(T entity) where T : class
+        public static async Task<T> AddEntity<T>(T entity) where T : class
         {
             using (var context = new SqliteContext())
             {
 
                 context.Entry<T>(entity).State = EntityState.Added;
-                context.SaveChanges();
+                await context.SaveChangesAsync();
                 return entity;
             }
 
         }
 
-        public static T UpdateEntity<T>(T entity) where T : class
+        public static async Task<T> UpdateEntity<T>(T entity) where T : class
         {
             using (var context = new SqliteContext())
             {
 
                 context.Entry<T>(entity).State = EntityState.Modified;
-                context.SaveChanges();
+                await context.SaveChangesAsync();
                 return entity;
             }
 
         }
 
-        public static bool DeleteEntity<T>(T entity) where T : class
+        public static async Task<bool> DeleteEntity<T>(T entity) where T : class
         {
             using (var context = new SqliteContext())
             {
                 context.Entry<T>(entity).State = EntityState.Deleted;
-                context.SaveChanges();
+                await context.SaveChangesAsync();
                 return true;
             }
                 
         }
 
-        public static T GetEntityByID<T>(object id) where T : class
+        public static async Task<T> GetEntityByID<T>(object id) where T : class
         {
             using (var context = new SqliteContext())
             {
-                return context.Set<T>().Find(id);
+                return await context.Set<T>().FindAsync(id);
             }
                 
         }

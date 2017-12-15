@@ -1,8 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using StockLibrary.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Linq;
+
 
 namespace StockLibrary
 {
@@ -35,6 +40,49 @@ namespace StockLibrary
                 }
             }
             return html;
+        }
+
+        public List<FundDay> ParseJson(string json, string symbol)
+        {
+            var days = new List<FundDay>();
+            JObject obj = (JObject)JsonConvert.DeserializeObject(json);
+
+            var container = obj.Last.Last;
+
+            foreach (JProperty dataPoint in container)
+            {
+                var tokens = dataPoint.Children().Children().ToList();
+
+                var day = new FundDay
+                {
+                    FundDayDate = DateTime.Parse(dataPoint.Name),
+                    Symbol = symbol
+                };
+            
+                foreach(JProperty token in tokens)
+                {
+                    if(token.Name.Contains("open"))
+                    {
+                        day.Open = token.Value.Value<decimal>();
+                    }
+                    else if(token.Name.Contains("close"))
+                    {
+                        day.Close = token.Value.Value<decimal>();
+                    }
+                    else if(token.Name.Contains("high"))
+                    {
+                        day.High = token.Value.Value<decimal>();
+                    }
+                    else if(token.Name.Contains("low"))
+                    {
+                        day.Low = token.Value.Value<decimal>();
+                    }
+                }
+
+                //DateTime date = dataPoint.First
+                days.Add(day);
+            }
+            return days;
         }
     }
 }
