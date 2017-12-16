@@ -48,6 +48,14 @@ namespace StockLibrary
             }
         }
 
+        public static List<Fund> GetFundsWithoutData()
+        {
+            using (var context = new SqliteContext())
+            {
+                return context.Fund.FromSql("SELECT f.* FROM Fund f LEFT OUTER JOIN FundDay fd ON f.Symbol = fd.Symbol WHERE fd.Symbol is null and f.IsActive = 1").ToList();
+            }
+        }
+
         public static async Task<T> AddEntity<T>(T entity) where T : class
         {
             using (var context = new SqliteContext())

@@ -26,7 +26,7 @@ namespace StockConsole
 
             //InitializeNYSE();
 
-            var funds = DataAccess.GetActiveFunds().Result;
+            var funds = DataAccess.GetFundsWithoutData();
             var alphaVantage = new StockLibrary.AlphaVantage(apiKey);
 
             Stopwatch stopwatch = new Stopwatch();
@@ -46,7 +46,7 @@ namespace StockConsole
                 var days = alphaVantage.ParseJson(html, fund.Symbol);
                 await DataAccess.AddFundDays(days);
                 Console.WriteLine("Got " + fund.Symbol);
-                Thread.Sleep(2000);
+                Thread.Sleep(4000);
             });
             stopwatch.Stop();
             Console.WriteLine(funds.Count() + " funds in " + stopwatch.ElapsedMilliseconds);
