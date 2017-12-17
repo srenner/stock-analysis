@@ -14,13 +14,14 @@ namespace StockConsole
     class Program
     {
         private static int _coreCount = 1;
+        private static string _apiKey = "";
         static void Main(string[] args)
         {
             _coreCount = Environment.ProcessorCount;
             //Console.WriteLine("Found " + _coreCount + " core(s)");
 
-            string apiKey = ConfigurationManager.AppSettings["apiKey"].ToString();
-            if(!string.IsNullOrEmpty(apiKey))
+            _apiKey = ConfigurationManager.AppSettings["apiKey"].ToString();
+            if(!string.IsNullOrEmpty(_apiKey))
             {
                 //Console.WriteLine("Found an API key to use.");
             }
@@ -30,19 +31,55 @@ namespace StockConsole
 
             DrawMenu();
 
-            int current = 0;
-            int total = 100;
-
-            while(current <= total)
+            while(true)
             {
-                DrawProgressBar(current);
-                current++;
-                Thread.Sleep(100);
+                var key = Console.ReadKey();
+                Console.WriteLine();
+                switch (key.Key)
+                {
+                    case ConsoleKey.NumPad1:
+                    case ConsoleKey.D1:
+                        {
+                            InitializeNYSE();
+                            DrawMenu();
+                            break;
+                        }
+
+                    case ConsoleKey.NumPad2:
+                    case ConsoleKey.D2:
+                        {
+                            Console.WriteLine("Not Implemented");
+                            DrawMenu();
+                            break;
+                        }
+                    case ConsoleKey.NumPad3:
+                    case ConsoleKey.D3:
+                        {
+                            Console.WriteLine("Not Implemented");
+                            DrawMenu();
+                            break;
+                        }
+                    case ConsoleKey.NumPad4:
+                    case ConsoleKey.D4:
+                        {
+                            GetPricesForAll();
+                            DrawMenu();
+                            break;
+                        }
+                    case ConsoleKey.NumPad5:
+                    case ConsoleKey.D5:
+                        {
+                            Console.WriteLine("Not Implemented");
+                            DrawMenu();
+                            break;
+                        }
+                    case ConsoleKey.Q:
+                        {
+                            Environment.Exit(0);
+                            break;
+                        }
+                }
             }
-
-            
-
-            //InitializeNYSE();
 
             //var funds = DataAccess.GetFundsWithoutData();
             //var alphaVantage = new StockLibrary.AlphaVantage(apiKey);
@@ -68,13 +105,6 @@ namespace StockConsole
             //});
             //stopwatch.Stop();
             //Console.WriteLine(funds.Count() + " funds in " + stopwatch.ElapsedMilliseconds);
-
-
-
-
-
-
-            Console.ReadKey();
         }
 
         private static void DrawMenu()
@@ -112,7 +142,49 @@ namespace StockConsole
             }
         }
 
+        private static void GetPricesForAll()
+        {
+            //var funds = DataAccess.GetFundsWithoutData();
+            var funds = DataAccess.GetActiveFunds().Result;
+            var alphaVantage = new StockLibrary.AlphaVantage(_apiKey);
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            //foreach (var fund in funds)
+            //{
+            //    string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
+            //    var days = alphaVantage.ParseJson(html, fund.Symbol);
+            //    if(days == null || days.Count == 0)
+            //    {
+            //        DataAccess.SetFundInactive(fund.Symbol);
+            //    }
+            //    Console.WriteLine("Got " + fund.Symbol);
+            //    Thread.Sleep(1000);
+            //}
+            int processed = 0;
+            int total = funds.Count;
+            Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async fund =>
+            {
+                string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
+                var days = alphaVantage.ParseJson(html, fund.Symbol);
+                if (days == null || days.Count == 0)
+                {
+                    DataAccess.SetFundInactive(fund.Symbol);
+                }
+                else
+                {
+                    await DataAccess.AddFundDays(days);
+                }
+                //Console.WriteLine("Got " + fund.Symbol);
+                processed++;
+                DrawProgressBar( (int) (( (decimal)processed / (decimal)total ) * 100 ));
+                Console.Write("Got " + fund.Symbol + "     " + processed + "/" + total + "     ");
+                Thread.Sleep(2000);
+            });
+            stopwatch.Stop();
+            Console.WriteLine(funds.Count() + " funds in " + stopwatch.ElapsedMilliseconds);
+        }
 
         private static void InitializeNYSE()
         {

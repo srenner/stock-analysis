@@ -45,43 +45,46 @@ namespace StockLibrary
         public List<FundDay> ParseJson(string json, string symbol)
         {
             var days = new List<FundDay>();
-            JObject obj = (JObject)JsonConvert.DeserializeObject(json);
-
-            var container = obj.Last.Last;
-
-            foreach (JProperty dataPoint in container)
+            try
             {
-                var tokens = dataPoint.Children().Children().ToList();
-
-                var day = new FundDay
+                JObject obj = (JObject)JsonConvert.DeserializeObject(json);
+                var container = obj.Last.Last;
+                foreach (JProperty dataPoint in container)
                 {
-                    FundDayDate = DateTime.Parse(dataPoint.Name),
-                    Symbol = symbol
-                };
-            
-                foreach(JProperty token in tokens)
-                {
-                    if(token.Name.Contains("open"))
+                    var tokens = dataPoint.Children().Children().ToList();
+                    var day = new FundDay
                     {
-                        day.Open = token.Value.Value<decimal>();
-                    }
-                    else if(token.Name.Contains("close"))
+                        FundDayDate = DateTime.Parse(dataPoint.Name),
+                        Symbol = symbol
+                    };
+                    foreach (JProperty token in tokens)
                     {
-                        day.Close = token.Value.Value<decimal>();
+                        if (token.Name.Contains("open"))
+                        {
+                            day.Open = token.Value.Value<decimal>();
+                        }
+                        else if (token.Name.Contains("close"))
+                        {
+                            day.Close = token.Value.Value<decimal>();
+                        }
+                        else if (token.Name.Contains("high"))
+                        {
+                            day.High = token.Value.Value<decimal>();
+                        }
+                        else if (token.Name.Contains("low"))
+                        {
+                            day.Low = token.Value.Value<decimal>();
+                        }
                     }
-                    else if(token.Name.Contains("high"))
-                    {
-                        day.High = token.Value.Value<decimal>();
-                    }
-                    else if(token.Name.Contains("low"))
-                    {
-                        day.Low = token.Value.Value<decimal>();
-                    }
+                    //DateTime date = dataPoint.First
+                    days.Add(day);
                 }
-
-                //DateTime date = dataPoint.First
-                days.Add(day);
             }
+            catch(Exception ex)
+            {
+                return null; //controller will see this and set fund to inactive
+            }
+
             return days;
         }
     }

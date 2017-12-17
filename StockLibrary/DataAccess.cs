@@ -19,6 +19,19 @@ namespace StockLibrary
             }
         }
 
+        public static async void SetFundInactive(string symbol)
+        {
+            using (var context = new SqliteContext())
+            {
+                var fund = context.Fund.Where(w => w.Symbol == symbol).FirstOrDefault();
+                if(fund != null)
+                {
+                    fund.IsActive = false;
+                    await UpdateEntity(fund);
+                }
+            }
+        }
+
         public static async Task UpsertFund(Fund fund)
         {
             var fundInDb = GetEntityByID<Fund>(fund.Symbol);
