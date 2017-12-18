@@ -26,9 +26,6 @@ namespace StockConsole
                 //Console.WriteLine("Found an API key to use.");
             }
 
-            
-
-
             DrawMenu();
 
             while(true)
@@ -70,6 +67,13 @@ namespace StockConsole
                     case ConsoleKey.D5:
                         {
                             Console.WriteLine("Not Implemented");
+                            DrawMenu();
+                            break;
+                        }
+                    case ConsoleKey.NumPad6:
+                    case ConsoleKey.D6:
+                        {
+                            CalculateDeltas();
                             DrawMenu();
                             break;
                         }
@@ -117,8 +121,34 @@ namespace StockConsole
             Console.WriteLine("3. Re-try inactive symbols");
             Console.WriteLine("4. Get prices for all symbols");
             Console.WriteLine("5. Get prices for new symbols");
+            Console.WriteLine("6. Calculate deltas");
             Console.WriteLine("Q. Quit");
             Console.WriteLine("*****************************");
+        }
+
+        private static void CalculateDeltas()
+        {
+            var fundDays = DataAccess.GetAllFundDays().Result;
+            int processed = 0;
+            int total = fundDays.Count;
+            Console.WriteLine();
+            Parallel.ForEach(fundDays, async day =>
+            {
+                //day.Delta = (day.Close - day.Open) / day.Open;
+                //await DataAccess.UpdateEntity(day);
+                if(day.Open > 0)
+                {
+                    await DataAccess.UpdateFundDayDelta(day.Symbol, ((day.Close - day.Open) / day.Open));
+                }
+                processed++;
+
+                //DrawProgressBar((int)(((decimal)processed / (decimal)total) * 100));
+                Console.Write("\r" + processed + "/" + total);
+
+                //DrawProgressBar((int)(((decimal)processed / (decimal)total) * 100));
+
+            });
+            Console.WriteLine();
         }
 
         private static void DrawProgressBar(int percent)
@@ -174,13 +204,13 @@ namespace StockConsole
                 }
                 else
                 {
-                    await DataAccess.AddFundDays(days);
+                    await DataAccess.AddFundDays(days, DateTime.Now.AddYears(-5));
                 }
                 //Console.WriteLine("Got " + fund.Symbol);
                 processed++;
                 DrawProgressBar( (int) (( (decimal)processed / (decimal)total ) * 100 ));
                 Console.Write("Got " + fund.Symbol + "     " + processed + "/" + total + "     ");
-                Thread.Sleep(2000);
+                Thread.Sleep(4000);
             });
             stopwatch.Stop();
             Console.WriteLine(funds.Count() + " funds in " + stopwatch.ElapsedMilliseconds);
@@ -202,6 +232,7 @@ namespace StockConsole
         private static void InitializeNasdaq()
         {
             string nasdaqListSource = "http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download";
+            throw new NotImplementedException();
         }
 
     }

@@ -8,6 +8,6 @@ namespace StockLibrary
     {
         string ApiKey { get; set; }
 
-        string GetTimeSeriesDaily(string symbol);
+        string GetTimeSeriesDaily(string symbol, bool compact = true);
     }
 }

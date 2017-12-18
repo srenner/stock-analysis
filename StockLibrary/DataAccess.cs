@@ -46,18 +46,40 @@ namespace StockLibrary
             }
         }
 
-        public static async Task AddFundDays(List<FundDay> days)
+        public static async Task AddFundDays(List<FundDay> days, DateTime? earliestDate = null)
         {
+            if(!earliestDate.HasValue)
+            {
+                earliestDate = DateTime.MinValue;
+            }
             using (var context = new SqliteContext())
             {
                 foreach(var day in days)
                 {
                     var dayInDb = context.FundDay.Where(w => w.Symbol == day.Symbol && w.FundDayDate == day.FundDayDate).FirstOrDefault();
-                    if(dayInDb == null)
+                    if(dayInDb == null && day.FundDayDate >= earliestDate)
                     {
+                        day.Delta = ((day.Close - day.Open) / day.Open);
                         await AddEntity(day);
                     }
                 }
+            }
+        }
+
+        public static async Task UpdateFundDayDelta(string symbol, decimal delta)
+        {
+            using (var context = new SqliteContext())
+            {
+                string sql = "UPDATE FundDay SET Delta = {0} WHERE Symbol = {1}";
+                await context.Database.ExecuteSqlCommandAsync(sql, symbol, delta);
+            }
+        }
+
+        public static async Task<List<FundDay>> GetAllFundDays()
+        {
+            using (var context = new SqliteContext())
+            {
+                return await context.FundDay.ToListAsync();
             }
         }
 

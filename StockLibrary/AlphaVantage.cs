@@ -20,13 +20,22 @@ namespace StockLibrary
             this.ApiKey = apiKey;
         }
 
-        public string GetTimeSeriesDaily(string symbol)
+        public string GetTimeSeriesDaily(string symbol, bool compact = true)
         {
             if(string.IsNullOrEmpty(this.ApiKey))
             {
                 throw new Exception("API key missing");
             }
-            string url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=" + this.ApiKey;
+            string outputsize = "&outputsize=";
+            if(compact)
+            {
+                outputsize += "compact";
+            }
+            else
+            {
+                outputsize += "full";
+            }
+            string url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + outputsize + "&apikey=" + this.ApiKey;
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             string html = "";
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
