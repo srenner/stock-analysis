@@ -85,30 +85,6 @@ namespace StockConsole
                 }
             }
 
-            //var funds = DataAccess.GetFundsWithoutData();
-            //var alphaVantage = new StockLibrary.AlphaVantage(apiKey);
-
-            //Stopwatch stopwatch = new Stopwatch();
-            //stopwatch.Start();
-
-            //foreach(var fund in funds)
-            //{
-            //    string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
-            //    var days = alphaVantage.ParseJson(html, fund.Symbol);
-            //    Console.WriteLine("Got " + fund.Symbol);
-            //    Thread.Sleep(100);
-            //}
-
-            //Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async fund =>
-            //{
-            //    string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
-            //    var days = alphaVantage.ParseJson(html, fund.Symbol);
-            //    await DataAccess.AddFundDays(days);
-            //    Console.WriteLine("Got " + fund.Symbol);
-            //    Thread.Sleep(8000);
-            //});
-            //stopwatch.Stop();
-            //Console.WriteLine(funds.Count() + " funds in " + stopwatch.ElapsedMilliseconds);
         }
 
         private static void DrawMenu()
@@ -141,12 +117,7 @@ namespace StockConsole
                     await DataAccess.UpdateFundDayDelta(day.Symbol, ((day.Close - day.Open) / day.Open));
                 }
                 processed++;
-
-                //DrawProgressBar((int)(((decimal)processed / (decimal)total) * 100));
                 Console.Write("\r" + processed + "/" + total);
-
-                //DrawProgressBar((int)(((decimal)processed / (decimal)total) * 100));
-
             });
             Console.WriteLine();
         }
@@ -174,24 +145,9 @@ namespace StockConsole
 
         private static void GetPricesForAll()
         {
-            //var funds = DataAccess.GetFundsWithoutData();
             var funds = DataAccess.GetActiveFunds().Result;
             var alphaVantage = new StockLibrary.AlphaVantage(_apiKey);
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            //foreach (var fund in funds)
-            //{
-            //    string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
-            //    var days = alphaVantage.ParseJson(html, fund.Symbol);
-            //    if(days == null || days.Count == 0)
-            //    {
-            //        DataAccess.SetFundInactive(fund.Symbol);
-            //    }
-            //    Console.WriteLine("Got " + fund.Symbol);
-            //    Thread.Sleep(1000);
-            //}
             int processed = 0;
             int total = funds.Count;
             Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async fund =>
@@ -206,14 +162,11 @@ namespace StockConsole
                 {
                     await DataAccess.AddFundDays(days, DateTime.Now.AddYears(-5));
                 }
-                //Console.WriteLine("Got " + fund.Symbol);
                 processed++;
                 DrawProgressBar( (int) (( (decimal)processed / (decimal)total ) * 100 ));
                 Console.Write("Got " + fund.Symbol + "     " + processed + "/" + total + "     ");
                 Thread.Sleep(4000);
             });
-            stopwatch.Stop();
-            Console.WriteLine(funds.Count() + " funds in " + stopwatch.ElapsedMilliseconds);
         }
 
         private static void InitializeNYSE()
