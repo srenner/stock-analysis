@@ -18,13 +18,22 @@ namespace StockConsole
         static void Main(string[] args)
         {
             _coreCount = Environment.ProcessorCount;
-            //Console.WriteLine("Found " + _coreCount + " core(s)");
-
             _apiKey = ConfigurationManager.AppSettings["apiKey"].ToString();
-            if(!string.IsNullOrEmpty(_apiKey))
+
+            //var dates = DataAccess.GetAllDates().Result;
+            //dates.ForEach(x => Console.WriteLine(x.ToString()));
+
+            //FillCorrelations();
+
+            //get most recent increases
+
+            var scores = StockLogic.GetNaivePicks().OrderByDescending(o => o.Score).ToList();
+
+            foreach(var score in scores)
             {
-                //Console.WriteLine("Found an API key to use.");
+                Console.WriteLine(score.Symbol + "\t" + score.Score);
             }
+
 
             DrawMenu();
 
@@ -100,6 +109,44 @@ namespace StockConsole
             Console.WriteLine("6. Calculate deltas");
             Console.WriteLine("Q. Quit");
             Console.WriteLine("*****************************");
+        }
+
+        private static async void FillCorrelations()
+        {
+            var dates = DataAccess.GetAllDates().Result;
+
+            var goodFundDays = DataAccess.GetGoodFundDays(0.03M, DateTime.Now.AddYears(-1)).Result;
+
+            foreach(var day in goodFundDays)
+            {
+                var nextDay = dates.Where(w => w > day.FundDayDate).Take(1).FirstOrDefault();
+                if(nextDay > DateTime.MinValue)
+                {
+                    var correlatedGoodDays = goodFundDays.Where(w => w.FundDayDate == nextDay).ToList();
+                    if(correlatedGoodDays.Count > 0)
+                    {
+                        string stop = "asdf";
+
+                        foreach(var correlatedGoodDay in correlatedGoodDays)
+                        {
+                            var correlated = new StockLibrary.Models.CorrelatedIncrease
+                            {
+                                PrimaryFundDayID = day.FundDayID,
+                                SecondaryFundDayID = correlatedGoodDay.FundDayID
+                            };
+
+                            //await DataAccess.AddEntity(correlated);
+                            await DataAccess.AddCorrelatedIncrease(correlated);
+                        }
+
+                    }
+                }
+            }
+
+
+            goodFundDays.ForEach(x => Console.WriteLine(x.Symbol + x.FundDayDate.ToShortDateString()));
+
+            Console.WriteLine(goodFundDays.Count + " results");
         }
 
         private static void CalculateDeltas()

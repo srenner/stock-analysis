@@ -14,5 +14,20 @@ namespace StockLibrary.Models
         public int SecondaryFundDayID { get; set; }
         public FundDay SecondaryFundDay { get; set; }
 
+
+        public override string ToString()
+        {
+            if(PrimaryFundDay != null && SecondaryFundDay != null)
+            {
+                return PrimaryFundDay.Symbol + " " + PrimaryFundDay.FundDayDate.ToShortDateString() +
+                    "->" +
+                    SecondaryFundDay.Symbol + " " + SecondaryFundDay.FundDayDate.ToShortDateString();
+            }
+            else
+            {
+                return base.ToString();
+            }
+
+        }
     }
 }

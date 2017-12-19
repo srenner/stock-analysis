@@ -2,6 +2,7 @@
 using StockLibrary.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,67 @@ namespace StockLibrary
 {
     public class DataAccess
     {
+
+        public static async  Task<List<DateTime>> GetAllDates()
+        {
+            List<DateTime> dates = new List<DateTime>();
+            using (var context = new SqliteContext())
+            {
+                var conn = context.Database.GetDbConnection();
+                try {
+                    
+                    await conn.OpenAsync();
+                    using (var command = conn.CreateCommand())
+                    {
+                        string query = "select distinct FundDayDate from FundDay order by FundDayDate";
+                        command.CommandText = query;
+                        DbDataReader reader = await command.ExecuteReaderAsync();
+
+                        if (reader.HasRows)
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                dates.Add(reader.GetDateTime(0));
+                            }
+                        }
+                        reader.Dispose();
+                    }
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+            return dates;
+        }
+                
+        public static async Task AddCorrelatedIncrease(CorrelatedIncrease increase)
+        {
+            using (var context = new SqliteContext())
+            {
+                var increaseInDb = context.CorrelatedIncrease
+                    .Where(w => w.PrimaryFundDayID == increase.PrimaryFundDayID)
+                    .Where(w => w.SecondaryFundDayID == increase.SecondaryFundDayID)
+                    .FirstOrDefault();
+
+                if(increaseInDb == null || increaseInDb.CorrelatedIncreaseID == 0)
+                {
+                    await AddEntity(increase);
+                }
+            }
+        }
+
+        public static async Task<List<CorrelatedIncrease>> GetCorrelatedIncreases(string primarySymbol)
+        {
+            using (var context = new SqliteContext())
+            {
+                return await context.CorrelatedIncrease
+                    .Include(i => i.PrimaryFundDay)
+                    .Include(i => i.SecondaryFundDay)
+                    .Where(w => w.PrimaryFundDay.Symbol == primarySymbol)
+                    .ToListAsync();
+            }
+        }
 
         public static async Task<List<Fund>> GetActiveFunds()
         {
@@ -80,6 +142,22 @@ namespace StockLibrary
             using (var context = new SqliteContext())
             {
                 return await context.FundDay.ToListAsync();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="percentIncrease">0.01 = 1%, 1.0 = 100%</param>
+        /// <returns></returns>
+        public static async Task<List<FundDay>> GetGoodFundDays(decimal percentIncrease, DateTime fromDate)
+        {
+            using (var context = new SqliteContext())
+            {
+                return await context.FundDay
+                    .Where(w => w.Delta >= percentIncrease)
+                    .Where(w => w.FundDayDate >= fromDate)
+                    .ToListAsync();
             }
         }
 
