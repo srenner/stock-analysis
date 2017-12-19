@@ -121,7 +121,10 @@ namespace StockLibrary
                     var dayInDb = context.FundDay.Where(w => w.Symbol == day.Symbol && w.FundDayDate == day.FundDayDate).FirstOrDefault();
                     if(dayInDb == null && day.FundDayDate >= earliestDate)
                     {
-                        day.Delta = ((day.Close - day.Open) / day.Open);
+                        if(day.Open != 0.0M)
+                        {
+                            day.Delta = ((day.Close - day.Open) / day.Open);
+                        }
                         await AddEntity(day);
                     }
                 }
