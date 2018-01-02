@@ -38,15 +38,22 @@ namespace StockLibrary
             string url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + outputsize + "&apikey=" + this.ApiKey;
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             string html = "";
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            try
             {
-                using (Stream stream = response.GetResponseStream())
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    using (Stream stream = response.GetResponseStream())
                     {
-                        html = reader.ReadToEnd();
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            html = reader.ReadToEnd();
+                        }
                     }
                 }
+            }
+            catch(System.Net.WebException e)
+            {
+                //probably a 503 error, mark it as such and try again later
             }
             return html;
         }
