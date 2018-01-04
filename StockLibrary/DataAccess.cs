@@ -94,6 +94,17 @@ namespace StockLibrary
             }
         }
 
+        public static async Task SetFundRetry(string symbol, bool retry, string message)
+        {
+            var fund = await GetEntityByID<Fund>(symbol);
+            if(fund != null)
+            {
+                fund.Retry = retry;
+                fund.RetryMessage = message;
+                await UpdateEntity(fund);
+            }
+        }
+
         public static async Task UpsertFund(Fund fund)
         {
             var fundInDb = GetEntityByID<Fund>(fund.Symbol);

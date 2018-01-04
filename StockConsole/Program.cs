@@ -199,7 +199,7 @@ namespace StockConsole
             int total = funds.Count;
             Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async fund =>
             {
-                string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol);
+                string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol).Result;
                 var days = alphaVantage.ParseJson(html, fund.Symbol);
                 if (days == null || days.Count == 0)
                 {

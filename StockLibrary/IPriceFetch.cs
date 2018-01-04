@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace StockLibrary
 {
@@ -8,6 +9,6 @@ namespace StockLibrary
     {
         string ApiKey { get; set; }
 
-        string GetTimeSeriesDaily(string symbol, bool compact = true);
+        Task<string> GetTimeSeriesDaily(string symbol, bool compact = true);
     }
 }

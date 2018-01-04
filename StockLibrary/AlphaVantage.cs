@@ -7,7 +7,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Linq;
-
+using System.Threading.Tasks;
 
 namespace StockLibrary
 {
@@ -20,7 +20,7 @@ namespace StockLibrary
             this.ApiKey = apiKey;
         }
 
-        public string GetTimeSeriesDaily(string symbol, bool compact = true)
+        public async Task<string> GetTimeSeriesDaily(string symbol, bool compact = true)
         {
             if(string.IsNullOrEmpty(this.ApiKey))
             {
@@ -53,6 +53,7 @@ namespace StockLibrary
             }
             catch(System.Net.WebException e)
             {
+                await DataAccess.SetFundRetry(symbol, true, e.Message);
                 //probably a 503 error, mark it as such and try again later
             }
             return html;
