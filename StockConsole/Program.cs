@@ -20,20 +20,11 @@ namespace StockConsole
             _coreCount = Environment.ProcessorCount;
             _apiKey = ConfigurationManager.AppSettings["apiKey"].ToString();
 
-            //var dates = DataAccess.GetAllDates().Result;
-            //dates.ForEach(x => Console.WriteLine(x.ToString()));
-
-            //FillCorrelations();
-
-            //get most recent increases
-
-            var scores = StockLogic.GetNaivePicks().OrderByDescending(o => o.Score).ToList();
-
-            foreach(var score in scores)
-            {
-                Console.WriteLine(score.Symbol + "\t" + score.Score);
-            }
-
+            //var scores = StockLogic.GetNaivePicks().OrderByDescending(o => o.Score).ToList();
+            //foreach(var score in scores)
+            //{
+            //    Console.WriteLine(score.Symbol + "\t" + score.Score);
+            //}
 
             DrawMenu();
 
@@ -86,6 +77,13 @@ namespace StockConsole
                             DrawMenu();
                             break;
                         }
+                    case ConsoleKey.NumPad7:
+                    case ConsoleKey.D7:
+                        {
+                            GetPricesForRetry();
+                            DrawMenu();
+                            break;
+                        }
                     case ConsoleKey.Q:
                         {
                             Environment.Exit(0);
@@ -107,6 +105,7 @@ namespace StockConsole
             Console.WriteLine("4. Get prices for all symbols");
             Console.WriteLine("5. Get prices for new symbols");
             Console.WriteLine("6. Calculate deltas");
+            Console.WriteLine("7. Retry failed symbols");
             Console.WriteLine("Q. Quit");
             Console.WriteLine("*****************************");
         }
@@ -197,20 +196,47 @@ namespace StockConsole
 
             int processed = 0;
             int total = funds.Count;
-            Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 2 }, async fund =>
+            Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 2 }, fund =>
             {
                 string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol).Result;
                 var days = alphaVantage.ParseJson(html, fund.Symbol);
                 if (days == null || days.Count == 0)
                 {
-                    DataAccess.SetFundInactive(fund.Symbol);
+                    var setInactiveTask = DataAccess.SetFundInactive(fund.Symbol);
                 }
                 else
                 {
-                    await DataAccess.AddFundDays(days, DateTime.Now.AddYears(-5));
+                    var addFundDaysTask = DataAccess.AddFundDays(days, DateTime.Now.AddYears(-5));
                 }
                 processed++;
                 DrawProgressBar( (int) (( (decimal)processed / (decimal)total ) * 100 ));
+                Console.Write("Got " + fund.Symbol + "     " + processed + "/" + total + "     ");
+                Thread.Sleep(4000);
+            });
+        }
+
+        private static void GetPricesForRetry()
+        {
+            var funds = DataAccess.GetActiveFunds().Result.Where(w => w.Retry == true).ToList();
+            var alphaVantage = new StockLibrary.AlphaVantage(_apiKey);
+
+            int processed = 0;
+            int total = funds.Count;
+            Parallel.ForEach(funds, new ParallelOptions { MaxDegreeOfParallelism = 2 }, fund =>
+            {
+                string html = alphaVantage.GetTimeSeriesDaily(fund.Symbol).Result;
+                var days = alphaVantage.ParseJson(html, fund.Symbol);
+                if (days == null || days.Count == 0)
+                {
+                    Task setInactiveTask = DataAccess.SetFundInactive(fund.Symbol);
+                }
+                else
+                {
+                    Task addFundDaysTask = DataAccess.AddFundDays(days, DateTime.Now.AddYears(-5));
+                    Task retryTask = DataAccess.SetFundRetry(fund.Symbol, false, "");
+                }
+                processed++;
+                DrawProgressBar((int)(((decimal)processed / (decimal)total) * 100));
                 Console.Write("Got " + fund.Symbol + "     " + processed + "/" + total + "     ");
                 Thread.Sleep(4000);
             });

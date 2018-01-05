@@ -81,7 +81,7 @@ namespace StockLibrary
             }
         }
 
-        public static async void SetFundInactive(string symbol)
+        public static async Task SetFundInactive(string symbol)
         {
             using (var context = new SqliteContext())
             {
