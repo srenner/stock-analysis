@@ -84,6 +84,20 @@ namespace StockConsole
                             DrawMenu();
                             break;
                         }
+                    case ConsoleKey.NumPad8:
+                    case ConsoleKey.D8:
+                        {
+                            var scores = StockLogic.GetNaivePicks().OrderByDescending(o => o.Score).ToList();
+                            foreach(var score in scores)
+                            {
+                                if(score.Score > 10)
+                                {
+                                    Console.WriteLine(score.Symbol + "\t" + score.Score);
+                                }
+                            }
+                            DrawMenu();
+                            break;
+                        }
                     case ConsoleKey.Q:
                         {
                             Environment.Exit(0);
@@ -106,6 +120,7 @@ namespace StockConsole
             Console.WriteLine("5. Get prices for new symbols");
             Console.WriteLine("6. Calculate deltas");
             Console.WriteLine("7. Retry failed symbols");
+            Console.WriteLine("8. Calculate daily scores");
             Console.WriteLine("Q. Quit");
             Console.WriteLine("*****************************");
         }
