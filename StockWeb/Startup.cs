@@ -35,6 +35,7 @@ namespace StockWeb
             }
 
             app.UseMvc();
+            app.UseFileServer();
         }
     }
 }
