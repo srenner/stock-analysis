@@ -159,6 +159,14 @@ namespace StockLibrary
             }
         }
 
+        public static async Task<Fund> GetFund(string symbol)
+        {
+            using (var context = new SqliteContext())
+            {
+                return await context.Fund.Where(w => w.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefaultAsync();
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
