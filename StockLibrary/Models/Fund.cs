@@ -16,5 +16,7 @@ namespace StockLibrary.Models
 
         public bool Retry { get; set; }
         public string RetryMessage { get; set; }
+
+        public List<FundDay> Prices { get; set; }
     }
 }

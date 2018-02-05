@@ -163,7 +163,9 @@ namespace StockLibrary
         {
             using (var context = new SqliteContext())
             {
-                return await context.Fund.Where(w => w.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefaultAsync();
+                return await context.Fund
+                    .Include(i => i.Prices)
+                    .Where(w => w.Symbol.ToUpper() == symbol.ToUpper()).FirstOrDefaultAsync();
             }
         }
 
