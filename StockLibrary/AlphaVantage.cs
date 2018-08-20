@@ -26,20 +26,28 @@ namespace StockLibrary
             {
                 throw new Exception("API key missing");
             }
-            string url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=" + this.ApiKey;
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            string html = "";
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            try
             {
-                using (Stream stream = response.GetResponseStream())
+                string url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=" + this.ApiKey;
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                string html = "";
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    using (Stream stream = response.GetResponseStream())
                     {
-                        html = reader.ReadToEnd();
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            html = reader.ReadToEnd();
+                        }
                     }
                 }
+                return html;
             }
-            return html;
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return null;
         }
 
         public List<FundDay> ParseJson(string json, string symbol)
