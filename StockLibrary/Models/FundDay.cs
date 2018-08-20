@@ -17,5 +17,12 @@ namespace StockLibrary.Models
         public decimal High { get; set; }
         public decimal Low { get; set; }
         public decimal Close { get; set; }
+
+        public decimal Delta { get; set; }
+
+        public override string ToString()
+        {
+            return Symbol + " " + FundDayDate.ToShortDateString() + " " + Delta;
+        }
     }
 }

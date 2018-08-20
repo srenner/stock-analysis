@@ -11,31 +11,14 @@ using System;
 namespace StockLibrary.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    partial class SqliteContextModelSnapshot : ModelSnapshot
+    [Migration("20171217224239_Delta")]
+    partial class Delta
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
-
-            modelBuilder.Entity("StockLibrary.Models.CorrelatedIncrease", b =>
-                {
-                    b.Property<int>("CorrelatedIncreaseID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("PrimaryFundDayID");
-
-                    b.Property<int>("SecondaryFundDayID");
-
-                    b.HasKey("CorrelatedIncreaseID");
-
-                    b.HasIndex("PrimaryFundDayID");
-
-                    b.HasIndex("SecondaryFundDayID");
-
-                    b.ToTable("CorrelatedIncrease");
-                });
 
             modelBuilder.Entity("StockLibrary.Models.Fund", b =>
                 {
@@ -47,10 +30,6 @@ namespace StockLibrary.Migrations
                     b.Property<bool>("IsActive");
 
                     b.Property<string>("Name");
-
-                    b.Property<bool>("Retry");
-
-                    b.Property<string>("RetryMessage");
 
                     b.HasKey("Symbol");
 
@@ -81,19 +60,6 @@ namespace StockLibrary.Migrations
                     b.HasIndex("Symbol");
 
                     b.ToTable("FundDay");
-                });
-
-            modelBuilder.Entity("StockLibrary.Models.CorrelatedIncrease", b =>
-                {
-                    b.HasOne("StockLibrary.Models.FundDay", "PrimaryFundDay")
-                        .WithMany()
-                        .HasForeignKey("PrimaryFundDayID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("StockLibrary.Models.FundDay", "SecondaryFundDay")
-                        .WithMany()
-                        .HasForeignKey("SecondaryFundDayID")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("StockLibrary.Models.FundDay", b =>

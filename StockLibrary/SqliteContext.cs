@@ -10,6 +10,7 @@ namespace StockLibrary
     {
         public DbSet<Models.Fund> Fund { get; set; }
         public DbSet<Models.FundDay> FundDay { get; set; }
+        public DbSet<Models.CorrelatedIncrease> CorrelatedIncrease { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

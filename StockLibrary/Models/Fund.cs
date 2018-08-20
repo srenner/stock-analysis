@@ -13,5 +13,10 @@ namespace StockLibrary.Models
         public string Name { get; set; }
         public string Exchange { get; set; }
         public bool IsActive { get; set; }
+
+        public bool Retry { get; set; }
+        public string RetryMessage { get; set; }
+
+        public List<FundDay> Prices { get; set; }
     }
 }

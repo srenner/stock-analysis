@@ -11,9 +11,10 @@ using System;
 namespace StockLibrary.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    partial class SqliteContextModelSnapshot : ModelSnapshot
+    [Migration("20171218042054_Correlation")]
+    partial class Correlation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,10 +48,6 @@ namespace StockLibrary.Migrations
                     b.Property<bool>("IsActive");
 
                     b.Property<string>("Name");
-
-                    b.Property<bool>("Retry");
-
-                    b.Property<string>("RetryMessage");
 
                     b.HasKey("Symbol");
 
